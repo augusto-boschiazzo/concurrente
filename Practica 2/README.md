@@ -15,7 +15,7 @@
         ```c
         sem s = 1;
 
-        Process Persona[id: 0..N-1]
+        Process::Persona[id: 0..N-1]
         {
             P(s);
             //Pasar por detector;
@@ -28,7 +28,7 @@
         ```c
         sem s = 3;
 
-        Process Persona[id: 0..N-1]
+        Process::Persona[id: 0..N-1]
         {
             P(s);
             //Pasar por detector;
@@ -41,7 +41,7 @@
         ```c
         sem s = 3;
 
-        Process Persona[id: 0..N-1]
+        Process::Persona[id: 0..N-1]
         {
             int cant = rand() mod 10 + 1;
             for (int i = 0; i < cant; i++)
@@ -62,7 +62,7 @@
         ```c
         sem mutex = 1; colaFallos c[N]; int cant = 0;
 
-        Process Checker[id: 0..4]
+        Process::Checker[id: 0..4]
         {
             Fallo fallo;
             P(mutex);
@@ -83,7 +83,7 @@
         ```c
         sem mutex = 1; colaFallos c[N]; int cant = 0; int cantFallos[4] = ([4] = 0); sem mutexGravedad[4] = ([4] = 0);
 
-        Process Checker[id: 0..4]
+        Process::Checker[id: 0..4]
         {
             Fallo fallo;
             P(mutex);
@@ -108,7 +108,7 @@
         ```c
         sem mutex = 1; colaFallos c[N]; int cant = 0; int cantFallos[4] = ([4] = 0);
 
-        Process Checker[id: 0..4]
+        Process::Checker[id: 0..4]
         {
             Fallo fallo;
             P(mutex);
