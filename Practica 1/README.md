@@ -37,7 +37,7 @@
         No es correcta:
 
         ```c
-        Process Productor:
+        Process::Productor
         {
             while(true)
             {
@@ -46,7 +46,7 @@
             }
         }
 
-        Process Consumidor:
+        Process::Consumidor
         {
             while(true)
             {
@@ -67,7 +67,7 @@
     ```c
     int cant = 0; colaRecurso c[5];
     
-    Process Consumidor[id: 0..N-1]
+    Process::Consumidor[id: 0..N-1]
     {
         Recurso recurso;
         while(true)
@@ -88,7 +88,7 @@
         ```c
         Impresora impresora;
         
-        Process persona[id = 0..N-1]
+        Process::persona[id = 0..N-1]
         {
             while(true)
             {
@@ -102,7 +102,7 @@
         ```c
         int turno = 0; int proximo = 0; int cola[0..N-1] = ([n] = 0);
 
-        Process Persona[id = 0..N-1]
+        Process::Persona[id = 0..N-1]
         {
             <cola[id] = turno; turno++>
             <await(cola[id] == proximo);>
@@ -116,7 +116,7 @@
         ```c
         int turno = 0;
 
-        Process Persona[id = 0..N-1]
+        Process::Persona[id = 0..N-1]
         {
             <await(id == turno);>
             Imprimir(documento);
