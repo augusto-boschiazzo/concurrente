@@ -11,7 +11,7 @@
         ```c
         int cant = 0; int pri_ocupada = 0; int pri_vacia = 0; int buffer[N];
     
-        Process Productor::
+        Process::Productor
         { 
             while (true)
             { // produce elemento
@@ -21,7 +21,7 @@
             }
         }
 
-        Process Consumidor::
+        Process::Consumidor
         { 
             while (true)
             { 
