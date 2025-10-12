@@ -92,7 +92,7 @@
                 fallo = c.pop();
                 cant++;
                 V(mutex);
-                
+
                 P(mutexGravedad[fallo.gravedad]);
                 cantFallos[fallo.gravedad]++;
                 V(mutexGravedad[fallo.gravedad]);
@@ -117,15 +117,18 @@
                 fallo = c.pop();
                 cant++;
                 V(mutex);
-                
-                if (fallo.gravedad != id) 
+
+                if (fallo.gravedad != id)
                 {
                     P(mutex);
                     c.push(fallo);
+                    cant--;
                     V(mutex);
                 }
-
-                cantFallos[id]++;
+                else
+                {
+                    cantFallos[id]++;
+                }
 
                 P(mutex);
             }
@@ -134,3 +137,52 @@
         ```
 
 ---
+
+3.  _Un sistema operativo mantiene 5 instancias de un recurso almacenadas en una cola. Además, existen P procesos que necesitan usar una instancia del recurso. Para eso, deben sacar la instancia de la cola antes de usarla. Una vez usada, la instancia debe ser encolada nuevamente para su reúso._
+
+    ```c
+    sem recurso = 5, acceso = 1; colaRecurso c[5];
+
+    Process::Proceso[0..N-1]
+    {
+        Recurso recurso;
+        while(true)
+        {
+            P(recurso);
+            P(acceso);
+            recurso = c.pop();
+            V(acceso);
+            // usa recurso
+            P(acceso);
+            c.push(recurso);
+            V(acceso);
+            V(recurso);
+        }
+    }
+    ```
+
+4.  _Suponga que existe una BD que puede ser accedida por 6 usuarios como máximo al mismo tiempo. Además, los usuarios se clasifican como usuarios de prioridad alta y usuarios de prioridad baja. Por último, la BD tiene la siguiente restricción:_
+    * _no puede haber más de 4 usuarios con prioridad alta al mismo tiempo usando la BD._
+    * _no puede haber más de 5 usuarios con prioridad baja al mismo tiempo usando la BD._
+    _Indique si la solución presentada es la más adecuada. Justifique la respuesta._
+
+    ```c
+    sem total = 6, alta = 4, baja= 5;
+
+    Process Usuario-Alta [I:1..L]::
+    {
+        P (total);
+        P (alta);
+        //usa la BD
+        V(total);
+        V(alta);
+    }
+    Process Usuario-Baja [I:1..K]::
+    {
+        P (total);
+        P (baja);
+        //usa la BD
+        V(total);
+        V(baja);
+    }
+    ```
