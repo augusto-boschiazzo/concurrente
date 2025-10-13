@@ -339,6 +339,8 @@
 
         ```
 
+---
+
 6. _Existen N personas que deben imprimir un trabajo cada una. Resolver cada ítem usando semáforos:_
     
     1. _Implemente una solución suponiendo que existe una única impresora compartida por todas las personas, y las mismas la deben usar de a una persona a la vez, sin importar el orden. Existe una función Imprimir(documento) llamada por la persona que simula el uso de la impresora. Sólo se deben usar los procesos que representan a las Personas._
