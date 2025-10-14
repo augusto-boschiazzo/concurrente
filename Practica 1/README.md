@@ -196,10 +196,11 @@
     ```
 
     Condiciones de la sección crítica:
-        * **Exclusión mútua**: _A lo sumo un proceso está en su sección crítica_. Cumple, ya que la condición para entrar a la sección crítica sólo se llega a cumplir cuando el otro proceso sale.
-        * **Ausencia de Deadlock**: _Si dos o más procesos tratan de entrar a la sección crítica, al menos uno tendrá éxito_. Cumple, ya que cuando inicia la ejecución del programa, SC2 tiene las condiciones para entrar a la SC, y luego se alternan infinitamente.
-        * **Ausencia de demoras innecesarias**: _Si un proceso trata de entrar a la SC y los demás están en sus SNC o terminaron, el primero no está impedido a entrar a su SC_. Cumple, ya que apenas los procesos salen de su sección no crítica, cambian la condición, permitiéndole al otro entrar a su SC.
-        * **Eventual entrada**: _Un proceso que intenta entrar a su SC tiene posibilidades de hacerlo (eventualmente lo hará)_. Cumple, las SC son finitas, y las condiciones de entrada para cada proceso son verdaderas con infinita recurrencia, o sea, siempre pueden volver a entrar eventualmente.
+   
+    * **Exclusión mútua**: _A lo sumo un proceso está en su sección crítica_. Cumple, ya que la condición para entrar a la sección crítica sólo se llega a cumplir cuando el otro proceso sale.
+    * **Ausencia de Deadlock**: _Si dos o más procesos tratan de entrar a la sección crítica, al menos uno tendrá éxito_. Cumple, ya que cuando inicia la ejecución del programa, SC2 tiene las condiciones para entrar a la SC, y luego se alternan infinitamente.
+    * **Ausencia de demoras innecesarias**: _Si un proceso trata de entrar a la SC y los demás están en sus SNC o terminaron, el primero no está impedido a entrar a su SC_. Cumple, ya que apenas los procesos salen de su sección no crítica, cambian la condición, permitiéndole al otro entrar a su SC.
+    * **Eventual entrada**: _Un proceso que intenta entrar a su SC tiene posibilidades de hacerlo (eventualmente lo hará)_. Cumple, las SC son finitas, y las condiciones de entrada para cada proceso son verdaderas con infinita recurrencia, o sea, siempre pueden volver a entrar eventualmente.
 
 ---
 
