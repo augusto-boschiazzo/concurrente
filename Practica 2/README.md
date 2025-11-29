@@ -472,8 +472,7 @@
 
 ---
 
-7.  Suponga que se tiene un curso con 50 alumnos. Cada alumno debe realizar una tarea y existen 10 enunciados posibles. Una vez que todos los alumnos eligieron su tarea, comienzan a realizarla. Cada vez que un alumno termina su tarea, le avisa al profesor y se
-queda esperando el puntaje del grupo (depende de todos aquellos que comparten el mismo enunciado). Cuando un grupo terminó, el profesor les otorga un puntaje que representa el orden en que se terminó esa tarea de las 10 posibles.
+7.  _Suponga que se tiene un curso con 50 alumnos. Cada alumno debe realizar una tarea y existen 10 enunciados posibles. Una vez que todos los alumnos eligieron su tarea, comienzan a realizarla. Cada vez que un alumno termina su tarea, le avisa al profesor y se queda esperando el puntaje del grupo (depende de todos aquellos que comparten el mismo enunciado). Cuando un grupo terminó, el profesor les otorga un puntaje que representa el orden en que se terminó esa tarea de las 10 posibles._
 
     > Nota: Para elegir la tarea suponga que existe una función elegir que le asigna una tarea a un alumno (esta función asignará 10 tareas diferentes entre 50 alumnos, es decir, que 5 alumnos tendrán la tarea 1, otros 5 la tarea 2 y así sucesivamente para las 10 tareas).
 
@@ -523,19 +522,110 @@ queda esperando el puntaje del grupo (depende de todos aquellos que comparten el
 
 ---
 
-8. Una fábrica de piezas metálicas debe producir T piezas por día. Para eso, cuenta con E empleados que se ocupan de producir las piezas de a una por vez. La fábrica empieza a producir una vez que todos los empleados llegaron. Mientras haya piezas por fabricar, los
-empleados tomarán una y la realizarán. Cada empleado puede tardar distinto tiempo en fabricar una pieza. Al finalizar el día, se debe conocer cual es el empleado que más piezas fabricó.
+8. _Una fábrica de piezas metálicas debe producir T piezas por día. Para eso, cuenta con E empleados que se ocupan de producir las piezas de a una por vez. La fábrica empieza a producir una vez que todos los empleados llegaron. Mientras haya piezas por fabricar, los empleados tomarán una y la realizarán. Cada empleado puede tardar distinto tiempo en fabricar una pieza. Al finalizar el día, se debe conocer cual es el empleado que más piezas fabricó._
     
-    1. Implemente una solución asumiendo que T > E.
-    2. Implemente una solución que contemple cualquier valor de T y E
+    1. _Implemente una solución asumiendo que T > E._
+
+        ```c
+        sem mutexTomar = 1, mutexDepositar = 1, iniciarTrabajo = 0;
+        int contarLlegada = 0;
+        cola piezasParaArmar, piezasHechas;
+
+        Process::Empleado[id: 0..E-1]
+        {
+            int piezasRealizadas = 0; Pieza pieza;
+            P(mutexTomar);
+            contarLlegada++;
+            if (contarLlegada == E)
+                for int i = 0..E-1 -> V(iniciarTrabajo);
+            V(mutexTomar);
+            P(iniciarTrabajo);
+            P(mutexTomar);
+            while (piezasParaArmar.lenght() > 0)
+            {
+                pieza = piezasParaArmar.pop();
+                V(mutexTomar);
+                // fabrica pieza
+                piezasRealizadas++;
+                P(mutexDepositar);
+                piezasHechas.push(pieza);
+                V(mutexDepositar);    
+                P(mutexTomar);
+            }
+            V(mutexTomar);
+            print(piezasRealizadas);
+        }
+        ```
+
+    2. _Implemente una solución que contemple cualquier valor de T y E_
+
+        La solución ya presentada permite que el valor de T sea igual o menor a E, ya que, suponiendo que fuera menor, los empleados que se queden sin pieza, simplemente no entrarían al while.
 
 ---
 
-9. Resolver el funcionamiento en una fábrica de ventanas con 7 empleados (4 carpinteros, 1 vidriero y 2 armadores) que trabajan de la siguiente manera:
+9. _Resolver el funcionamiento en una fábrica de ventanas con 7 empleados (4 carpinteros, 1 vidriero y 2 armadores) que trabajan de la siguiente manera:_
 
-    - Los carpinteros continuamente hacen marcos (cada marco es armando por un único carpintero) y los deja en un depósito con capacidad de almacenar 30 marcos.
-    - El vidriero continuamente hace vidrios y los deja en otro depósito con capacidad para 50 vidrios.
-    - Los armadores continuamente toman un marco y un vidrio (en ese orden) de los depósitos correspondientes y arman la ventana (cada ventana es armada por un único armador).
+    - _Los carpinteros continuamente hacen marcos (cada marco es armando por un único carpintero) y los deja en un depósito con capacidad de almacenar 30 marcos._
+    - _El vidriero continuamente hace vidrios y los deja en otro depósito con capacidad para 50 vidrios._
+    - _Los armadores continuamente toman un marco y un vidrio (en ese orden) de los depósitos correspondientes y arman la ventana (cada ventana es armada por un único armador)._
+
+    ```c
+    sem mutexMarcos = 1, mutexVidrios = 1, marcosHechos = 0, vidriosHechos = 0, mutexVentanas = 1, hacerMarcos = 30, hacerVidrios = 50;
+    cola depositoMarcos, depositoVidrios, depositoVentanas;
+
+    Process::Carpintero[id: 0..4-1]
+    {
+        Marco marco;
+        while(true)
+        {
+            P(hacerMarcos);
+            marco = fabricarMarco();
+            P(mutexMarcos);
+            depositoMarcos.push(marco);
+            V(marcosHechos)
+            V(mutexMarcos);
+        }
+    }
+
+    Process::Vidriero
+    {
+        Vidrio vidrio;
+        while(true)
+        {
+            P(hacerVidrios);
+            vidrio = fabricarVidrio();
+            P(mutexVidrios);
+            depositoVidrios.push(vidrio);
+            v(vidriosHechos);
+            V(mutexVidrios);
+        }
+    }
+
+    Process::Armador[id: 0..2-1]
+    {
+        Marco marco; Vidrio vidrio; Ventana ventana;
+        while(true)
+        {
+            P(marcosHechos);
+            P(mutexMarcos);
+            marco = depositoMarcos.pop();
+            V(hacerMarcos);
+            V(mutexMarcos);
+
+            P(vidriosHechos);
+            P(mutexVidrios)
+            vidrio = depositoVidrios.pop();
+            V(hacerVidrios);
+            V(mutexVidrios);
+
+            ventana = fabricarVentana();
+
+            P(mutexVentanas);
+            depositoVentanas.push(ventana);
+            V(mutexVentanas);
+        }
+    }
+    ```
 
 ---
 
