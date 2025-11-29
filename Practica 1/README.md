@@ -4,7 +4,7 @@
 
 ---
 
-2. Realice una solución concurrente de grano grueso (utilizando <> y/o <await B; S>) para el siguiente problema. Dado un número N verifique cuántas veces aparece ese número en un arreglo de longitud M. Escriba las pre-condiciones que considere necesarias.
+2. _Realice una solución concurrente de grano grueso (utilizando <> y/o <await B; S>) para el siguiente problema. Dado un número N verifique cuántas veces aparece ese número en un arreglo de longitud M. Escriba las pre-condiciones que considere necesarias._
 
     ```c
     int cant = 0; int arreglo[0..M-1];
@@ -196,14 +196,15 @@
     ```
 
     Condiciones de la sección crítica:
-        * **Exclusión mútua**: _A lo sumo un proceso está en su sección crítica_. Cumple, ya que la condición para entrar a la sección crítica sólo se llega a cumplir cuando el otro proceso sale.
-        * **Ausencia de Deadlock**: _Si dos o más procesos tratan de entrar a la sección crítica, al menos uno tendrá éxito_. Cumple, ya que cuando inicia la ejecución del programa, SC2 tiene las condiciones para entrar a la SC, y luego se alternan infinitamente.
-        * **Ausencia de demoras innecesarias**: _Si un proceso trata de entrar a la SC y los demás están en sus SNC o terminaron, el primero no está impedido a entrar a su SC_. Cumple, ya que apenas los procesos salen de su sección no crítica, cambian la condición, permitiéndole al otro entrar a su SC.
-        * **Eventual entrada**: _Un proceso que intenta entrar a su SC tiene posibilidades de hacerlo (eventualmente lo hará)_. Cumple, las SC son finitas, y las condiciones de entrada para cada proceso son verdaderas con infinita recurrencia, o sea, siempre pueden volver a entrar eventualmente.
+   
+    * **Exclusión mútua**: _A lo sumo un proceso está en su sección crítica_. Cumple, ya que la condición para entrar a la sección crítica sólo se llega a cumplir cuando el otro proceso sale.
+    * **Ausencia de Deadlock**: _Si dos o más procesos tratan de entrar a la sección crítica, al menos uno tendrá éxito_. Cumple, ya que cuando inicia la ejecución del programa, SC2 tiene las condiciones para entrar a la SC, y luego se alternan infinitamente.
+    * **Ausencia de demoras innecesarias**: _Si un proceso trata de entrar a la SC y los demás están en sus SNC o terminaron, el primero no está impedido a entrar a su SC_. Cumple, ya que apenas los procesos salen de su sección no crítica, cambian la condición, permitiéndole al otro entrar a su SC.
+    * **Eventual entrada**: _Un proceso que intenta entrar a su SC tiene posibilidades de hacerlo (eventualmente lo hará)_. Cumple, las SC son finitas, y las condiciones de entrada para cada proceso son verdaderas con infinita recurrencia, o sea, siempre pueden volver a entrar eventualmente.
 
 ---
 
-7. Desarrolle una solución de grano fino usando sólo variables compartidas (no se puede usar las sentencias await ni funciones especiales como TS o FA). En base a lo visto en la clase 3 de teoría, resuelva el problema de acceso a sección crítica usando un proceso coordinador. En este caso, cuando un proceso SC\[i\] quiere entrar a su sección crítica le avisa al coordinador, y espera a que éste le dé permiso. Al terminar de ejecutar su sección crítica, el proceso SC\[i\] le avisa al coordinador. Nota: puede basarse en la solución para implementar barreras con “Flags y coordinador” vista en la teoría 2.
+7. _Desarrolle una solución de grano fino usando sólo variables compartidas (no se puede usar las sentencias await ni funciones especiales como TS o FA). En base a lo visto en la clase 3 de teoría, resuelva el problema de acceso a sección crítica usando un proceso coordinador. En este caso, cuando un proceso SC\[i\] quiere entrar a su sección crítica le avisa al coordinador, y espera a que éste le dé permiso. Al terminar de ejecutar su sección crítica, el proceso SC\[i\] le avisa al coordinador. Nota: puede basarse en la solución para implementar barreras con “Flags y coordinador” vista en la teoría 2._
 
     ```c
     bool seguir = true; int continuar[0..N-1] = ([N] = 0); int turno = 0;
