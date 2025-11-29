@@ -339,6 +339,8 @@
 
         ```
 
+---
+
 6. _Existen N personas que deben imprimir un trabajo cada una. Resolver cada ítem usando semáforos:_
     
     1. _Implemente una solución suponiendo que existe una única impresora compartida por todas las personas, y las mismas la deben usar de a una persona a la vez, sin importar el orden. Existe una función Imprimir(documento) llamada por la persona que simula el uso de la impresora. Sólo se deben usar los procesos que representan a las Personas._
@@ -467,3 +469,90 @@
             }
         }
         ```
+
+---
+
+7.  Suponga que se tiene un curso con 50 alumnos. Cada alumno debe realizar una tarea y existen 10 enunciados posibles. Una vez que todos los alumnos eligieron su tarea, comienzan a realizarla. Cada vez que un alumno termina su tarea, le avisa al profesor y se
+queda esperando el puntaje del grupo (depende de todos aquellos que comparten el mismo enunciado). Cuando un grupo terminó, el profesor les otorga un puntaje que representa el orden en que se terminó esa tarea de las 10 posibles.
+
+    > Nota: Para elegir la tarea suponga que existe una función elegir que le asigna una tarea a un alumno (esta función asignará 10 tareas diferentes entre 50 alumnos, es decir, que 5 alumnos tendrán la tarea 1, otros 5 la tarea 2 y así sucesivamente para las 10 tareas).
+
+    ```c
+    sem mutex = 1, iniciarCorreccion = 0, iniciarTarea = 0, esperarPuntaje[10] = ([10] 0);
+    int contador = 0, puntajeTarea[10] = ([10] 0);
+    cola tareasEntregadas;
+
+    Process::Alumno[id: 0..50-1]
+    {
+        int tarea; int puntaje; int veces;
+        P(mutex);
+        tarea = asignarTarea();
+        contador++;
+        if (contador == 50)
+            for veces = 0..50-1 -> V(iniciarTarea);
+        V(mutex);
+        P(iniciarTarea);
+        // realiza tarea
+        P(mutex);
+        tareasEntregadas.push(tarea);
+        V(mutex);
+        V(iniciarCorreccion);
+        P(esperarPuntaje[tarea]);
+        puntaje = puntajeTarea[tarea];
+    }
+
+    Process::Profesor
+    {
+        int tarea, puntaje = 10, i, j, cantidadTareaEntregada[10] = ([10] 0);
+        for i = 0..50-1
+        {
+            P(iniciarCorreccion);
+            P(mutex)
+            tarea = tareasEntregadas.pop(tarea);
+            V(mutex)
+            cantidadTareaEntregada[tarea]++;
+            if (cantidadTareaEntregada[tarea] == 5)
+            {
+                puntajeTarea[tarea] = puntaje--;
+                for j = 0..5-1 -> V(esperarPuntaje[tarea]);
+            }
+        }
+    }
+
+    ```
+
+---
+
+8. Una fábrica de piezas metálicas debe producir T piezas por día. Para eso, cuenta con E empleados que se ocupan de producir las piezas de a una por vez. La fábrica empieza a producir una vez que todos los empleados llegaron. Mientras haya piezas por fabricar, los
+empleados tomarán una y la realizarán. Cada empleado puede tardar distinto tiempo en fabricar una pieza. Al finalizar el día, se debe conocer cual es el empleado que más piezas fabricó.
+    
+    1. Implemente una solución asumiendo que T > E.
+    2. Implemente una solución que contemple cualquier valor de T y E
+
+---
+
+9. Resolver el funcionamiento en una fábrica de ventanas con 7 empleados (4 carpinteros, 1 vidriero y 2 armadores) que trabajan de la siguiente manera:
+
+    - Los carpinteros continuamente hacen marcos (cada marco es armando por un único carpintero) y los deja en un depósito con capacidad de almacenar 30 marcos.
+    - El vidriero continuamente hace vidrios y los deja en otro depósito con capacidad para 50 vidrios.
+    - Los armadores continuamente toman un marco y un vidrio (en ese orden) de los depósitos correspondientes y arman la ventana (cada ventana es armada por un único armador).
+
+---
+
+10. A una cerealera van T camiones a descargarse trigo y M camiones a descargar maíz. Sólo hay lugar para que 7 camiones a la vez descarguen, pero no pueden ser más de 5 del mismo tipo de cereal.
+
+    1. Implemente una solución que use un proceso extra que actúe como coordinador entre los camiones. El coordinador debe atender a los camiones según el orden de llegada. Además, debe retirarse cuando todos los camiones han descargado.
+    2. Implemente una solución que no use procesos adicionales (sólo camiones). No importa el orden de llegada para descargar. Nota: maximice la concurrencia.
+
+---
+
+11. En un vacunatorio hay un empleado de salud para vacunar a 50 personas. El empleado de salud atiende a las personas de acuerdo con el orden de llegada y de a 5 personas a la vez. Es decir, que cuando está libre debe esperar a que haya al menos 5 personas esperando, luego vacuna a las 5 primeras personas, y al terminar las deja ir para esperar por otras 5. Cuando ha atendido a las 50 personas el empleado de salud se retira. Nota: todos los procesos deben terminar su ejecución; suponga que el empleado tienen una función VacunarPersona() que simula que el empleado está vacunando a UNA persona. 
+
+---
+
+12. Simular la atención en una Terminal de Micros que posee 3 puestos para hisopar a 150 pasajeros. En cada puesto hay una Enfermera que atiende a los pasajeros de acuerdo con el orden de llegada al mismo. Cuando llega un pasajero se dirige al Recepcionista, quien le indica qué puesto es el que tiene menos gente esperando. Luego se dirige al puesto y espera a que la enfermera correspondiente lo llame para hisoparlo. Finalmente, se retira.
+
+    1. Implemente una solución considerando los procesos Pasajeros, Enfermera y Recepcionista.
+    2. Modifique la solución anterior para que sólo haya procesos Pasajeros y Enfermera, siendo los pasajeros quienes determinan por su cuenta qué puesto tiene menos personas esperando.
+
+    > Nota: suponga que existe una función Hisopar() que simula la atención del pasajero por parte de la enfermera correspondiente.
