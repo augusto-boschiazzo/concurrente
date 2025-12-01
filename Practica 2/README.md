@@ -632,7 +632,121 @@
 10. A una cerealera van T camiones a descargarse trigo y M camiones a descargar maíz. Sólo hay lugar para que 7 camiones a la vez descarguen, pero no pueden ser más de 5 del mismo tipo de cereal.
 
     1. Implemente una solución que use un proceso extra que actúe como coordinador entre los camiones. El coordinador debe atender a los camiones según el orden de llegada. Además, debe retirarse cuando todos los camiones han descargado.
+
+    ```c
+    int cantTotalCamiones = 0, cantDescargandoMaiz = 0, cantDescargandoTrigo = 0, islaDisponible = 0, cantIslasOcupadas = 0;
+    sem descargarMaiz = 0, descargarTrigo = 0, mutexMaiz = 1, mutexTrigo = 1, mutexDisponible = 1, mutexIslasOcupadas = 1;
+
+    Process::CamionMaiz[id: 0..M-1]
+    {
+        int disponible;
+        
+        P(descargarMaiz);
+        P(mutexMaiz);
+        cantDescargandoMaiz++;
+        V(mutexMaiz);
+        
+        P(mutexDisponible);
+        disponible = islaDisponible;
+        V(mutexDisponible);
+        
+        descargarMaiz(disponible);
+
+        P(mutexIslasOcupadas);
+        cantIslasOcupadas--;
+        V(mutexIslasOcupadas);
+
+        P(mutexMaiz);
+        cantDescargandoMaiz--;
+        V(mutexMaiz);        
+    }
+
+    
+    Process::CamionTrigo[id: 0..T-1]
+    {
+        int disponible;
+        
+        P(descargarTrigo);
+        P(mutexTrigo);
+        cantDescargandoTrigo++;
+        V(mutexTrigo);
+        
+        P(mutexDisponible);
+        disponible = islaDisponible;
+        V(mutexDisponible);
+        
+        descargarTrigo(disponible);
+
+        
+        P(mutexIslasOcupadas);
+        cantIslasOcupadas--;
+        V(mutexIslasOcupadas);
+
+        P(mutexTrigo);
+        cantDescargandoTrigo--;
+        V(mutexTrigo);
+    }
+
+    Process::Coordinador
+    {
+        for int i = 0; i > T + M; i++
+        {
+            P(hayEspacio);
+
+            if (cantDescargandoMaiz < 5)
+            {
+                V(descargarMaiz);
+                
+                P(mutexIslasOcupadas);
+                cantIslasOcupadas++;
+                V(mutexIslasOcupadas);
+            }
+            
+            P(islaDisponible);
+            disponible = (disponible + 1) % 7;
+            V(islaDisponible);
+
+            P(hayEspacio);
+
+            if (cantDescargandoTrigo < 5)
+            {
+                V(descargarTrigo);
+
+                P(mutexIslasOcupadas);
+                cantIslasOcupadas++;
+                V(mutexIslasOcupadas);
+            }
+
+            P(islaDisponible);
+            disponible = (disponible + 1) % 7;
+            V(islaDisponible);
+        }
+    }
+    ```
+
     2. Implemente una solución que no use procesos adicionales (sólo camiones). No importa el orden de llegada para descargar. Nota: maximice la concurrencia.
+
+    ```c
+    sem camiones = 7, trigo = 5, maiz = 5;
+
+    Process::CamionTrigo[id: 0..T-1]
+    {
+        P(trigo);
+        P(camiones);
+        descargarTrigo();
+        V(camiones);
+        V(trigo);
+    }
+    
+    Process::CamionMaiz[id: 0..M-1]
+    {
+        P(maiz);
+        P(camiones);
+        descargarTrigo();
+        V(camiones);
+        V(maiz);
+    }
+    ```
 
 ---
 
