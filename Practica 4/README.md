@@ -322,6 +322,376 @@
     
     3. _Modifique la solución (a) considerando que cada administrativo imprime 10 trabajos y que todos los procesos deben terminar su ejecución._
 
+    ```c
+    
+    ```
+
     4. _Modifique la solución (b) considerando que tanto el director como cada administrativo imprimen 10 trabajos y que todos los procesos deben terminar su ejecución._
 
     5. _Si la solución al ítem d) implica realizar Busy Waiting, modifíquela para evitarlo._
+
+---
+
+### PMS
+
+1. _Suponga que existe un antivirus distribuido que se compone de R procesos robots Examinadores y 1 proceso Analizador. Los procesos Examinadores están buscando continuamente posibles sitios web infectados; cada vez que encuentran uno avisan la dirección y luego continúan buscando. El proceso Analizador se encarga de hacer todas las pruebas necesarias con cada uno de los sitios encontrados por los robots para determinar si están o no infectados._
+
+    1. _Analice el problema y defina qué procesos, recursos y comunicaciones serán necesarios/convenientes para resolver el problema._
+
+    2. _Implemente una solución con PMS sin tener en cuenta el orden de los pedidos._
+
+        ```c
+        process Examinador[id: 0..R-1] {
+            string sitio;
+            while(true) {
+                    sitio = BuscarSitioInfectado();
+                    Analizador!(sitio);
+            }
+        }
+
+        process Analizador {
+            string sitio;
+            while(true) {
+                Examinador?(sitio);
+                AnalizarSitio(sitio);
+            }
+        }
+        ```
+
+        El problema de esta solución es que, más allá del orden de llegada, los examinadores pasan mucho tiempo esperando para enviar su sitio y seguir buscando otros.
+
+    3. _Modifique el inciso (b) para que el Analizador resuelva los pedidos en el orden en que se hicieron._
+
+        ```c
+        process Examinador[id: 0..R-1] {
+            string sitio;
+            while(true) {
+                sitio = BuscarSitioInfectado();
+                Coordinador!(sitio);
+            }
+        }
+
+        process Coordinador {
+            cola sitios;
+            string sitio;
+            while(true) {
+                do Examinador[*]?(sitio) -> push(sitios, sitio);
+                [] not empty(sitios); Analizador?() -> Analizador!(pop(sitios));
+                od
+            }
+        }
+
+        process Analizador {
+            string sitio;
+            while(true) {
+                Coordinador!(); //pide trabajo
+                Coordinador?(sitio); // Los distintos mensajes no requieren un port porque se turnan siempre. 
+                                     // Si hubiera más mensajes de recepción o envío posibles, entonces sí se 
+                                     // debería tener en cuenta el port.
+                AnalizarSitio(sitio)
+            }
+        }
+        ```
+
+        El coordinador permite que se respete el órden de llegada de los examinadores ya que no deben quedarse esperando a que termine el análisis para que su mensaje sea recibido. De esta manera, el coordinador agrega los sitios a la cola y los mensajes se reciben con poco tiempo de espera, permitiendo que los examinadores continúen rápidamente con su trabajo, y que sean agregados a la cola apenas envían su mensaje.
+
+2. _En un laboratorio de genética veterinaria hay 3 empleados. El primero de ellos continuamente prepara las muestras de ADN; cada vez que termina, se la envía al segundo empleado y vuelve a su trabajo. El segundo empleado toma cada muestra de ADN preparada, arma el set de análisis que se deben realizar con ella y espera el resultado para archivarlo. Por último, el tercer empleado se encarga de realizar el análisis y devolverle el resultado al segundo empleado._
+
+    ```c
+    process Preparador {
+        string muestra;
+        
+        while (true) {
+            muestra = PrepararMusetra();
+            Admin!preparacion(muestra);
+        }
+    }
+
+    process Armador {
+        string muestra;
+        string set;
+        string resultado;
+
+        while (true) {
+            Admin!pedidoMuestra();
+            Admin?preparacion(muestra);
+            set = PrepararSet(muestra);
+            Analizador!(set);
+
+            Analizador?(resultado)
+            ArchivarResultado(resultado);
+        }
+    }
+
+    process Analizador {
+        string set;
+        string resultado;
+
+        while (true) {
+            Armador?(set);
+
+            resultado = AnalizarSet(set);
+            Armador!(resultado);
+        }
+    }
+
+    process Admin {
+        string muestra;
+        string set;
+        string resultado;
+        cola muestras;
+        cola sets;
+        cola resultados;
+
+        while (true) {
+            do Preparador?preparacion(muestra) -> push(muestras, muestra);
+            [] not empty(muestras); Armador?pedidoMuestra() -> Armador!preparacion(pop(muestras));
+            od
+        }
+    }
+    ```
+
+3. _En un examen final hay N alumnos y P profesores. Cada alumno resuelve su examen, lo entrega y espera a que alguno de los profesores lo corrija y le indique la nota. Los profesores corrigen los exámenes respetando el orden en que los alumnos van entregando._
+
+    > _Nota: maximizar la concurrencia; no generar demora innecesaria; todos los procesos deben terminar su ejecución_
+
+    1. _Implemente una solución con PMS considerando que P=1._
+    
+        ```c
+        process Alumno[id: 0..N-1] {
+            string examen;
+            string resultado;
+
+            examen = ResolverExamen();
+            Mesa!(id, examen);
+            Profesor?(resultado);
+        }
+
+        process Profesor {
+            string examen;
+            string resultado;
+            int alumno;
+
+            while (true) {
+                Mesa!();
+                Mesa?(alumno, examen);
+                resultado = CorregirExamen(examen);
+                Alumno[alumno]!(resultado);
+            }
+        }
+
+        process Mesa {
+            int alumno;
+            string examen;
+            cola examenes;
+
+            while (true) {
+                do Alumno[*]?(alumno, examen) -> push(examenes, (alumno, examen));
+                [] not empty(examenes); Profesor?() -> Profesor!(pop(examenes));
+                od
+            }
+        }
+        ```
+
+    2. _Implemente una solución con PMS considerando que P>1._
+        
+        ```c
+        process Alumno[id: 0..N-1] {
+            string examen;
+            string resultado;
+
+            examen = ResolverExamen();
+            Mesa!(id, examen);
+            Profesor[*]?(resultado);
+        }
+
+        process Profesor[id: 0..P-1] {
+            string examen;
+            string resultado;
+            int alumno;
+
+            while (true) {
+                Mesa!();
+                Mesa?(alumno, examen);
+                resultado = CorregirExamen(examen);
+                Alumno[alumno]!(resultado);
+            }
+        }
+
+        process Mesa {
+            int alumno;
+            string examen;
+            cola examenes;
+
+            while (true) {
+                do Alumno[*]?(alumno, examen) -> push(examenes, (alumno, examen));
+                [] not empty(examenes); Profesor[*]?() -> Profesor!(pop(examenes));
+                od
+            }
+        }
+        ```
+    
+    3. _Modifique (b) considerando que los alumnos no comienzan a realizar su examen hasta que todos hayan llegado al aula._
+            
+        ```c
+        process Alumno[id: 0..N-1] {
+            string examen;
+            string resultado;
+
+            Mesa!llegada();
+            Mesa?inicio();
+
+            examen = ResolverExamen();
+            Mesa!(id, examen);
+            Profesor[*]?(resultado);
+        }
+
+        process Profesor[id: 0..P-1] {
+            string examen;
+            string resultado;
+            int alumno;
+
+            Mesa!llegada();
+
+            while (true) {
+                Mesa!();
+                Mesa?(alumno, examen);
+                resultado = CorregirExamen(examen);
+                Alumno[alumno]!(resultado);
+            }
+        }
+
+        process Mesa {
+            int alumno;
+            string examen;
+            cola examenes;
+
+            for (int i = 0; i < N + P; i++) {
+                do Alumno[*]?llegada() -> ;
+                [] Profesor[*]?llegada() -> ;
+                od
+            }
+
+            for (int i = 0; i < N; i++) {
+                Alumno[i]!inicio();
+            }
+
+            while (true) {
+                do Alumno[*]?(alumno, examen) -> push(examenes, (alumno, examen));
+                [] not empty(examenes); Profesor[*]?() -> Profesor!(pop(examenes));
+                od
+            }
+        }
+        ```
+    
+4. _En una exposición aeronáutica hay un simulador de vuelo (que debe ser usado con exclusión mutua) y un empleado encargado de administrar su uso. Hay P personas que esperan a que el empleado lo deje acceder al simulador, lo usa por un rato y se retira._
+
+    > _Nota: cada persona usa sólo una vez el simulador._
+
+    1. _Implemente una solución donde el empleado sólo se ocupa de garantizar la exclusión mutua (sin importar el orden)._
+
+        ```c
+        process Persona[id: 0..P-1] {
+            Empleado?();
+            UsarSimulador();
+            Empleado!();
+        }
+
+        process Empleado {
+            for (int i = 0; i < P; i++) {
+                Persona[*]!();
+                Persona[*]?();
+            }
+        }
+        ```
+    
+    2. _Modifique la solución anterior para que el empleado los deje acceder según el orden de su identificador (hasta que la persona i no lo haya usado, la persona i+1 debe esperar)._
+
+        ```c
+        process Persona[id: 0..P-1] {
+            Empleado?();
+            UsarSimulador();
+            Empleado!();
+        }
+
+        process Empleado {
+            for (int i = 0; i < P; i++) {
+                Persona[i]!();
+                Persona[i]?();
+            }
+        }
+        ```
+
+    3. _Modifique la solución a) para que el empleado considere el orden de llegada para dar acceso al simulador._ 
+
+        ```c
+        process Persona[id: 0..P-1] {
+            Empleado!llegada(id);
+            Empleado?();
+            UsarSimulador();
+            Empleado!();
+        }
+
+        process Empleado {
+            int persona;
+            bool libre;
+            cola personas;
+
+            while (true) {
+                do Persona[*]?llegada(persona) -> 
+                    if (not libre) {
+                        push(personas, persona);
+                    }
+                    else {
+                        libre = false;
+                        Persona[persona]!();
+                    };
+                [] Persona[*]?() ->}
+                    if (not empty(personas)) {
+                        persona = pop(personas, persona);
+                        Persona[persona]!();
+                    }
+                    else {
+                        libre = true;
+                    }
+                od
+            }
+        }
+        ```
+
+5. _En un estadio de fútbol hay una máquina expendedora de gaseosas que debe ser usada por E Espectadores de acuerdo al orden de llegada. Cuando el espectador accede a la máquina en su turno usa la máquina y luego se retira para dejar al siguiente. Nota: cada Espectador una sólo una vez la máquina._
+
+    ```c
+    process Espectador[id: 0..E-1] {
+        Maquina!(id);
+        Maquina?();
+        UsarMaquina();
+        Maquina!();
+    }
+
+    process Maquina {
+        int espectador;
+        bool libre;
+        cola espectadores;
+
+        while (true) {
+            do Espectador[*]?(espectador) ->
+                if (not libre) {
+                    push(espectadores, espectador);
+                }
+                else {
+                    libre = false;
+                    Espectador[espectador]!();
+                }
+            [] Espectador[*]?() ->
+                if (not empty(espectadores)) {
+                    espectador = pop(espectadores);
+                    Espectador[espectador]!();
+                }
+                else {
+                    libre = true;
+                }
+            od
+        }
+    }
+    ```
