@@ -195,6 +195,7 @@ Process AutoF2[id: 0..28] {
 # Parcial 2025 - MD - Fecha 1
 
 1. 
+
     ```c
     chan llegada();
     chan inicio();
