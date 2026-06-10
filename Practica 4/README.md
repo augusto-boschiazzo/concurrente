@@ -232,22 +232,20 @@
         string ticket;
 
         while (true) {
-            if (empty(salida) && not empty(llegada) && any(cabinaLibre)) { // devuelve true si alguno es true
+            if (empty(salida) && not empty(llegada) && any(cabinaLibre)) -> // devuelve true si alguno es true
                 receive llegada(idCliente);
                 idCabina = first(cabinaLibre); // first() retorna la primera que está libre
                 cabinaLibre[idCabina] = false;
                 send entrarACabina[idCliente](idCabina);
-            }
-            else if (not empty(salida)) {
-                receive salida(idCliente, idCabina);
-                cabinaLibre[idCabina] = true;
-                ticket = generarTicket(idCabina);
-                send recibirTicket[idCliente](ticket);
-            }
-            else if (not empty(cobro)) {
-                receive cobro(ticket);
-                Cobrar(ticket);
-            }
+            [] (empty(llegada)) -> 
+                if (not empty(salida)) ->
+                    receive salida(idCliente, idCabina);
+                    cabinaLibre[idCabina] = true;
+                    ticket = generarTicket(idCabina);
+                    send recibirTicket[idCliente](ticket);
+                [] (not empty(cobro))  ->
+                    receive cobro(ticket);
+                    Cobrar(ticket);
         }
     }
     ```

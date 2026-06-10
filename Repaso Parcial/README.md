@@ -191,3 +191,157 @@ Process AutoF2[id: 0..28] {
     Circuito[circuito].Liberar();
 }
 ```
+
+# Parcial 2025 - MD - Fecha 1
+
+1. 
+    ```c
+    chan llegada();
+    chan inicio();
+    chan entrega(int, text);
+    chan correccion[E](int);
+
+    process Estudiante[id: 0..E-1] {
+        text examen;
+        int resultado;
+        
+        send llegada();
+        receive inicio();
+
+        examen = ResolverExamen();
+        send entrega(id, examen);
+        receive correcion[id](resultado);
+    }
+
+    process Profesor {
+        text examen;
+        int alumno;
+        int resultado;
+
+        for (i: 0..E-1) {
+            receive llegada();
+        }
+
+        for (i: 0..E-1) {
+            send inicio();
+        }
+
+        for (i: 0..E-1) {
+            receive entrega(alumno, examen);
+            resultado = CorregirParcial();
+            send correcion[alumno](resultado);
+        }
+    }
+    ```
+2. 
+
+    ```c
+    process Paciente[id: 0..15-1] {
+        text sintomas;
+        text tratamiento;
+
+        Admin!llegada(id);
+        Medico?atencion(tratamiento);
+    }
+
+    process Admin {
+        text sintomas;
+        int idPaciente;
+        cola pacientes;
+
+        while(true) {
+            do Pacientes[*]?llegada(idPaciente, sintomas) -> push(pacientes, (idPaciente, sintomas));
+            [] not empty(pacientes); Medico?pedirTrabajo() -> Medico!enviarPaciente(pop(pacientes));
+            od
+        }
+    }
+
+    process Medico {
+        text sintomas;
+        text tratamiento;
+        int idPaciente;
+
+        while (true) {
+            Admin!pedirTrabajo();
+            Admin?enviarPaciente(idPaciente, sintomas);
+            tratamiento = atender(sintomas);
+            Paciente[idPaciente]!atencion(tratamiento);
+        }
+    }
+    ```
+
+3. 
+
+    ```ada
+    Procedure punto3
+        TASK TYPE Programador IS
+            ENTRY RecibirProblema(problema: IN text);
+            ENTRY RecibirId(id: IN integer);
+            ENTRY RecibirCalificacion(resultado, puesto: IN integer);
+        END Programador;
+
+        TASK BODY Programador IS
+            problemilla: text;
+            resolucioncilla: text;
+            puestillo: integer;
+            resultadillo: integer;
+
+            Accept RecibirId(id: IN integer) do
+                idecilla:= id;
+            end RecibirId;
+
+            Accept RecibirProblema(problema: IN text) do
+                problemilla:= problema;
+            END RecibirProblema;
+
+            resolucioncilla:= ResolverProblema(problemilla);
+            Admin.RecibirResolucion(idecilla, resolucioncilla);
+            Accept RecibirCalificacion(resultado, puesto: IN integer) do
+                resultadillo:= resultado;
+                puestillo:= puesto;
+            end RecibirCalificacion;
+        END Programador;
+
+        arrayProgramadores: array (1..P) of Programador;
+
+        TASK Profesor IS
+            ENTRY RecibirResolucion(id: IN integer; resolucion: IN text; resultado, puesto: OUT integer);
+        END Profesor;
+
+        TASK BODY Profesor
+            puesto, idAlumno, resultado: integer;
+            problema, resolucion: text;
+            puesto:= 1;
+
+            for i in 1..E loop
+                arrayProgramadores(i).RecibirProblema(problema);
+            end loop;
+
+            loop
+                Admin.PedidoExamen(idAlumno, resolucion)
+                resultado:= Corregir(resolucion);
+                arrayProgramadores(idAlumno).RecibirCalificacion(puesto, resultado);
+                puesto:= puesto + 1;
+            end loop;
+        END Profesor;
+
+        TASK Admin IS
+            ENTRY RecibirResolucion(id: IN integer; resolucion: IN text);
+            ENTRY PedidoExamen(id: OUT integer; resolucion: OUT text);
+        END Admin;
+
+        TASK BODY Admin IS
+                Accept PedidoExamen(id: OUT integer; resolucion: OUT integer) is
+                    Accept RecibirResolucion(idecilla: IN integer; resolucioncilla: IN text) is
+                        id:= idecilla;
+                        resolucion:= resolucioncilla;
+                    end RecibirResolucion;
+                end PedidoExamen;
+        END Admin;
+
+    Begin
+        for i in 1..E loop
+            arregloProgramadores(i).RecibirId(i);
+        end loop;
+    End punto3;
+    ```
