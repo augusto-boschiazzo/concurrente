@@ -194,7 +194,7 @@ Process AutoF2[id: 0..28] {
 
 # Parcial 2025 - MD - Fecha 1
 
-1. 
+1. a 
 
     ```c
     chan llegada();
@@ -234,7 +234,7 @@ Process AutoF2[id: 0..28] {
         }
     }
     ```
-2. 
+2. a 
 
     ```c
     process Paciente[id: 0..15-1] {
@@ -271,7 +271,7 @@ Process AutoF2[id: 0..28] {
     }
     ```
 
-3. 
+3. a 
 
     ```ada
     Procedure punto3
